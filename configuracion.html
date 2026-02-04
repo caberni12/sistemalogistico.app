@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<title>Configuración</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+
+<style>
+body{
+ margin:0;
+ padding:20px;
+ background:var(--bg);
+ color:var(--txt);
+}
+
+.card{
+ padding:20px;
+ background:var(--panel);
+ border:1px solid var(--border);
+ border-radius:14px;
+}
+label{
+ display:block;
+ margin-top:12px;
+}
+</style>
+</head>
+
+<body>
+
+<div class="card">
+  <h2>⚙️ Configuración</h2>
+
+  <label>
+    Nombre del sistema
+    <input value="Sistema Logístico">
+  </label>
+
+  <label>
+    Tiempo de sesión (min)
+    <input type="number" value="30">
+  </label>
+
+  <p style="opacity:.7">Este módulo quedará conectado a Google Sheets.</p>
+</div>
+
+</body>
+</html>

@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<title>Usuarios</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+
+<style>
+body{
+ margin:0;
+ padding:20px;
+ background:var(--bg);
+ color:var(--txt);
+}
+.card{
+ background:var(--panel);
+ border:1px solid var(--border);
+ border-radius:14px;
+ padding:20px;
+}
+input,select{
+ width:100%;
+ padding:10px;
+ margin:6px 0;
+}
+button{
+ padding:10px;
+ background:#2563eb;
+ color:#fff;
+ border:none;
+ border-radius:10px;
+ cursor:pointer;
+}
+table{
+ width:100%;
+ margin-top:20px;
+ border-collapse:collapse;
+}
+td,th{
+ border-bottom:1px solid var(--border);
+ padding:8px;
+}
+</style>
+</head>
+
+<body>
+
+<div class="card">
+  <h2>👤 Usuarios del Sistema</h2>
+
+  <input placeholder="Usuario">
+  <input placeholder="Clave">
+  <input placeholder="Nombre">
+  <select>
+    <option>ADMIN</option>
+    <option>OPERADOR</option>
+    <option>REPARTIDOR</option>
+  </select>
+
+  <button>Guardar Usuario</button>
+
+  <table>
+    <tr>
+      <th>Usuario</th>
+      <th>Nombre</th>
+      <th>Rol</th>
+      <th>Activo</th>
+    </tr>
+  </table>
+</div>
+
+</body>
+</html>

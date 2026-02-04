@@ -1,0 +1,389 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<title>Sistema Profesional de Etiquetas</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+
+<style>
+/* ================= VARIABLES ================= */
+:root{
+ --w:100mm;
+ --h:150mm;
+ --gap:4mm;
+
+ --bg:#f8fafc;
+ --panel:#ffffff;
+ --text:#0f172a;
+
+ --border:#cbd5e1;
+ --btn:#06b6d4;
+ --btnHover:#0891b2;
+}
+
+/* ================= BASE ================= */
+*{
+ box-sizing:border-box;
+ font-family:Arial,Helvetica,sans-serif;
+ font-weight:700;
+}
+
+body{
+ margin:0;
+ display:flex;
+ min-height:100vh;
+ background:var(--bg);
+ color:var(--text);
+}
+
+/* ================= DESKTOP ================= */
+aside{
+ width:360px;
+ padding:20px;
+ background:var(--panel);
+ border-right:1px solid var(--border);
+ overflow:auto;
+}
+
+main{
+ flex:1;
+ padding:20px;
+ background:#eef2f7;
+}
+
+/* ================= LOGO ================= */
+.logo-sistema{
+ display:flex;
+ justify-content:center;
+ margin-bottom:12px;
+}
+
+.logo-sistema img{max-width:100px}
+
+/* ================= FORM ================= */
+h2{margin-top:0}
+
+label{
+ font-size:13px;
+ margin-top:10px;
+ display:block;
+}
+
+input,textarea,select{
+ width:100%;
+ padding:9px;
+ margin-top:4px;
+ border-radius:6px;
+ border:1px solid var(--border);
+ background:#fff;
+}
+
+textarea{resize:vertical}
+
+button{
+ width:100%;
+ padding:13px;
+ margin-top:12px;
+ border:none;
+ border-radius:8px;
+ background:var(--btn);
+ color:#fff;
+ cursor:pointer;
+}
+
+button:hover{background:var(--btnHover)}
+.secondary{background:#64748b}
+
+/* ================= PREVIEW ================= */
+#preview{
+ display:flex;
+ flex-direction:column;
+ align-items:center;
+}
+
+/* ================= ETIQUETA ================= */
+.label{
+ width:var(--w);
+ height:var(--h);
+ background:#fff;
+ margin-bottom:var(--gap);
+ page-break-inside:avoid;
+}
+
+/* PAPEL */
+.paper-thermal .label{
+ box-shadow:none;
+ border-radius:0;
+}
+
+.paper-normal .label{
+ box-shadow:0 4px 10px rgba(0,0,0,.15);
+ border-radius:6px;
+}
+
+.inner{
+ height:100%;
+ padding:6mm;
+ display:flex;
+ flex-direction:column;
+ gap:2.5mm;
+ align-items:center;
+}
+
+/* ================= CONTENIDO ================= */
+.big{
+ font-size:28px;
+ font-weight:900;
+ text-align:center;
+}
+
+.bulto{
+ font-size:22px;
+ font-weight:900;
+ text-align:center;
+}
+
+/* ================= QR ================= */
+.qr{margin:4mm 0}
+.qr canvas{width:110px;height:110px}
+
+/* ================= SEMÁFORO ================= */
+.semaforo{display:flex;gap:10px;margin:3mm 0}
+.luz{width:14px;height:14px;border-radius:50%;background:#cbd5e1}
+.luz.rojo{background:#dc2626}
+.luz.amarillo{background:#facc15}
+.luz.verde{background:#16a34a}
+
+/* ================= PROGRESO ================= */
+.progress{
+ width:100%;
+ height:8px;
+ background:#e5e7eb;
+ border-radius:6px;
+ overflow:hidden;
+}
+.progress span{
+ display:block;
+ height:100%;
+ background:#06b6d4;
+ width:0%;
+}
+
+/* ================= CAMPOS ================= */
+.field{
+ font-size:13px;
+ text-align:center;
+}
+.field b{
+ display:block;
+ margin-bottom:2px;
+}
+
+/* ================= MOBILE ================= */
+@media (max-width:768px){
+ body{flex-direction:column}
+
+ aside{
+  width:100%;
+  border-right:none;
+  border-bottom:1px solid var(--border);
+ }
+
+ main{padding:12px}
+ #preview{align-items:stretch}
+
+ .label{
+  width:100% !important;
+  height:auto !important;
+  border-radius:18px;
+  box-shadow:0 10px 26px rgba(0,0,0,.18);
+ }
+
+ .inner{padding:16px}
+ .big{font-size:22px}
+ .bulto{font-size:18px}
+ .qr canvas{width:140px;height:140px}
+}
+
+/* ================= PRINT ================= */
+@page{margin:0}
+
+@media print{
+ aside,
+ .semaforo,
+ .progress{
+  display:none !important;
+ }
+ body{background:#fff}
+}
+</style>
+</head>
+
+<body>
+
+<aside>
+ <div class="logo-sistema">
+  <img src="https://github.com/caberni12/gestionlogistico.app/blob/main/26.png?raw=true">
+ </div>
+
+ <h2>Etiquetas Logísticas</h2>
+
+ <!-- TIPO -->
+ <label>Tipo de impresora</label>
+ <select id="mode">
+  <option value="thermal">Térmica (Rollo)</option>
+  <option value="sheet">Convencional (A4)</option>
+ </select>
+
+ <label>Tipo de papel</label>
+ <select id="paper">
+  <option value="thermal">Papel térmico</option>
+  <option value="normal">Papel normal</option>
+ </select>
+
+ <!-- BUSCAR -->
+ <label>Buscar pedido</label>
+ <input id="buscarPedido">
+ <button class="secondary" onclick="buscarPedidoFn()">Buscar</button>
+
+ <hr>
+
+ <!-- DATOS -->
+ <label>Pedido</label><input id="pedido">
+ <label>Cliente</label><input id="cliente">
+ <label>Dirección</label><textarea id="direccion"></textarea>
+ <label>Comuna</label><input id="comuna">
+ <label>Transporte</label><input id="transporte">
+ <label>Bultos</label><input id="bultos" type="number" value="1" min="1">
+ <label>Observaciones</label><textarea id="obs"></textarea>
+
+ <!-- MEDIDAS -->
+ <label>Ancho etiqueta (mm)</label>
+ <input id="w" type="number" value="100">
+
+ <label>Alto etiqueta (mm)</label>
+ <input id="h" type="number" value="150">
+
+ <button onclick="guardarOReimprimir()">Guardar / Imprimir</button>
+</aside>
+
+<main>
+ <div id="preview"></div>
+</main>
+
+<script>
+const API_URL="https://script.google.com/macros/s/AKfycbyGluMuRIE4Bo_P9wVYUhT5bN-I132uYnbdU7u6W15Oi5QQD3nOF_QBfoeUyGAGpkK2Tw/exec";
+const preview=document.getElementById("preview");
+let pedidoExiste=false;
+
+/* ===== BUSCAR ===== */
+async function buscarPedidoFn(){
+ const p=buscarPedido.value.trim();
+ if(!p) return alert("Ingrese pedido");
+
+ const r=await fetch(API_URL);
+ const data=await r.json();
+ const f=data.find(x=>x.pedido==p);
+
+ if(!f){pedidoExiste=false;alert("Pedido no encontrado");return;}
+
+ pedidoExiste=true;
+ pedido.value=f.pedido;
+ cliente.value=f.cliente;
+ direccion.value=f.direccion;
+ comuna.value=f.comuna;
+ transporte.value=f.transporte;
+ bultos.value=f.etiquetas;
+ obs.value=f.observaciones;
+ generar();
+}
+
+/* ===== GENERAR ===== */
+function generar(){
+ preview.innerHTML="";
+ preview.className=mode.value+" paper-"+paper.value;
+
+ document.documentElement.style.setProperty("--w",w.value+"mm");
+ document.documentElement.style.setProperty("--h",h.value+"mm");
+
+ const total=+bultos.value||1;
+
+ for(let i=1;i<=total;i++){
+  const pct=Math.round((i/total)*100);
+
+  const l=document.createElement("div");
+  l.className="label";
+  l.innerHTML=`
+   <div class="inner">
+    <div class="qr"></div>
+    <div class="big">${pedido.value}</div>
+    <div class="bulto">BULTO ${i} DE ${total}</div>
+
+    <div class="semaforo">
+     <div class="luz ${pct<40?'rojo':''}"></div>
+     <div class="luz ${pct>=40&&pct<90?'amarillo':''}"></div>
+     <div class="luz ${pct>=90?'verde':''}"></div>
+    </div>
+
+    <div class="progress"><span style="width:${pct}%"></span></div>
+
+    <div class="field"><b>CLIENTE</b>${cliente.value}</div>
+    <div class="field"><b>DIRECCIÓN</b>${direccion.value}</div>
+    <div class="field"><b>COMUNA</b>${comuna.value}</div>
+    <div class="field"><b>TRANSPORTE</b>${transporte.value}</div>
+    <div class="field"><b>OBS</b>${obs.value}</div>
+   </div>`;
+  preview.appendChild(l);
+
+  new QRCode(l.querySelector(".qr"),{
+   text:pedido.value,
+   width:110,
+   height:110
+  });
+ }
+}
+
+/* ===== GUARDAR / IMPRIMIR ===== */
+async function guardarOReimprimir(){
+ generar();
+
+ if(pedidoExiste){
+  setTimeout(()=>window.print(),300);
+  return;
+ }
+
+ const payload={
+  action:"add",
+  PEDIDO:pedido.value,
+  CLIENTE:cliente.value,
+  DIRECCION:direccion.value,
+  COMUNA:comuna.value,
+  TRANSPORTE:transporte.value,
+  ETIQUETAS:+bultos.value,
+  OBSERVACIONES:obs.value,
+  STATUS:"PENDIENTE"
+ };
+
+ const r=await fetch(API_URL,{
+  method:"POST",
+  body:JSON.stringify(payload)
+ });
+
+ const res=await r.json();
+ if(!res.ok) return alert("Error al guardar");
+
+ pedidoExiste=true;
+ setTimeout(()=>window.print(),300);
+}
+
+/* ===== EVENTOS ===== */
+["pedido","cliente","direccion","comuna","transporte","bultos","obs","w","h","mode","paper"]
+.forEach(id=>document.getElementById(id).addEventListener("input",generar));
+
+generar();
+</script>
+
+</body>
+</html>

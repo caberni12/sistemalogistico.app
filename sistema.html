@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<title>Sistema</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+
+<style>
+body{
+ margin:0;
+ padding:20px;
+ background:var(--bg);
+ color:var(--txt);
+}
+
+.card{
+ padding:20px;
+ background:var(--panel);
+ border:1px solid var(--border);
+ border-radius:14px;
+}
+</style>
+</head>
+
+<body>
+
+<div class="card">
+  <h2>🧠 Sistema Logístico</h2>
+  <p>Bienvenido al núcleo del sistema.</p>
+
+  <button onclick="logout()">Cerrar sesión</button>
+</div>
+
+<script>
+if(!localStorage.getItem("session")){
+ parent.loadModule("login.html");
+}
+
+function logout(){
+ localStorage.removeItem("session");
+ parent.loadModule("login.html");
+}
+</script>
+
+</body>
+</html>

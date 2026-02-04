@@ -1,0 +1,336 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<title>Sistema Logístico</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+
+<style>
+:root{
+ --bg:#f8fafc;
+ --panel:#ffffff;
+ --txt:#000000;
+ --pri:#2563eb;
+ --border:#cbd5e1;
+}
+
+[data-theme="dark"]{
+ --bg:#0f172a;
+ --panel:#020617;
+ --txt:#e5e7eb;
+ --border:#1e293b;
+}
+
+*{
+ box-sizing:border-box;
+ font-family:Arial, sans-serif;
+}
+
+body{
+ margin:0;
+ background:var(--bg);
+ color:var(--txt);
+ height:100vh;
+ overflow:hidden;
+}
+
+/* ===== SIDEBAR ===== */
+aside{
+ position:fixed;
+ top:0;
+ left:0;
+ width:260px;
+ height:100vh;
+ background:var(--panel);
+ border-right:1px solid var(--border);
+ padding:20px;
+ transform:translateX(-100%);
+ transition:.3s;
+ z-index:1000;
+}
+aside.show{ transform:translateX(0); }
+
+.logo{
+ font-size:20px;
+ font-weight:900;
+ margin-bottom:25px;
+}
+
+/* ===== MENU ===== */
+.menu{
+ display:flex;
+ flex-direction:column;
+ gap:14px;
+}
+
+.menu button{
+ width:100%;
+ padding:14px;
+ border-radius:12px;
+ border:1px solid var(--border);
+ background:transparent;
+ color:var(--txt);
+ cursor:pointer;
+ font-size:15px;
+ text-align:left;
+ transition:.2s;
+}
+
+.menu button:hover{
+ background:rgba(37,99,235,.12);
+}
+
+.menu button.active{
+ background:var(--pri);
+ color:#fff;
+ border-color:var(--pri);
+}
+
+/* ===== OVERLAY ===== */
+.overlay{
+ position:fixed;
+ inset:0;
+ background:#0006;
+ opacity:0;
+ pointer-events:none;
+ transition:.3s;
+ z-index:900;
+}
+.overlay.show{
+ opacity:1;
+ pointer-events:auto;
+}
+
+/* ===== MAIN ===== */
+main{
+ width:100vw;
+ height:100vh;
+ display:flex;
+ flex-direction:column;
+}
+
+/* ===== TOPBAR ===== */
+.topbar{
+ min-height:56px;
+ display:flex;
+ align-items:center;
+ justify-content:space-between;
+ padding:0 14px;
+ background:var(--panel);
+ border-bottom:1px solid var(--border);
+}
+
+.left{
+ display:flex;
+ align-items:center;
+ gap:12px;
+}
+
+.right{
+ display:flex;
+ align-items:center;
+ gap:10px;
+}
+
+.hamburger{
+ font-size:26px;
+ cursor:pointer;
+ user-select:none;
+}
+
+.theme-toggle{
+ cursor:pointer;
+ font-size:20px;
+ user-select:none;
+}
+
+/* ===== CONEXIONES ===== */
+.conn{
+ display:flex;
+ align-items:center;
+ gap:6px;
+ font-size:12px;
+}
+
+.conn span{
+ font-weight:bold;
+}
+
+.on{ color:#22c55e; }
+.off{ color:#ef4444; }
+
+.conn button{
+ padding:4px 8px;
+ border-radius:8px;
+ border:none;
+ background:#2563eb;
+ color:#fff;
+ cursor:pointer;
+ font-size:11px;
+}
+
+/* ===== IFRAME ===== */
+iframe{
+ flex:1;
+ width:100%;
+ border:0;
+ background:transparent;
+}
+
+/* ======================= */
+/* ===== MOBILE MODE ===== */
+/* ======================= */
+@media (max-width:768px){
+
+ .topbar{
+  flex-wrap:wrap;
+  gap:8px;
+ }
+
+ .right{
+  width:100%;
+  display:grid;
+  grid-template-columns:repeat(2,1fr);
+  gap:8px;
+ }
+
+ .conn{
+  background:var(--panel);
+  border:1px solid var(--border);
+  border-radius:12px;
+  padding:6px;
+  justify-content:space-between;
+ }
+
+ .conn button{
+  padding:4px 6px;
+ }
+
+ iframe{
+  height:100%;
+ }
+
+ aside{
+  width:85%;
+  max-width:300px;
+ }
+}
+</style>
+</head>
+
+<body>
+
+<!-- SIDEBAR -->
+<aside id="sidebar">
+  <div class="logo">📦 LOGÍSTICA</div>
+
+  <div class="menu">
+    <button onclick="loadModule('main.html',this)">🏠 Inicio</button>
+    <button onclick="loadModule('etiquetas2.html',this)">🖨 Etiquetas</button>
+    <button onclick="loadModule('dashboard.html',this)">📊 Dashboard</button>
+    <button onclick="loadModule('codigodebarra2.html',this)">🏷️ Código de Barra</button>
+    <button class="active" onclick="loadModule('login.html',this)">🔐 Login</button>
+
+    <hr style="border:0;border-top:1px solid var(--border);margin:10px 0">
+
+    <button onclick="loadModule('configuracion.html',this)">⚙️ Configuración</button>
+    <button onclick="loadModule('usuarios.html',this)">👤 Usuarios</button>
+    <button onclick="loadModule('sistema.html',this)">🧠 Sistema</button>
+  </div>
+</aside>
+
+<div id="overlay" class="overlay" onclick="closeMenu()"></div>
+
+<!-- MAIN -->
+<main>
+  <div class="topbar">
+    <div class="left">
+      <div class="hamburger" onclick="toggleMenu()">☰</div>
+      <b>Sistema Logístico</b>
+    </div>
+
+    <!-- CONEXIONES -->
+    <div class="right">
+      <div class="conn">
+        <span id="c-login" class="off">● Login</span>
+        <button onclick="connect('login')">Conectar</button>
+      </div>
+      <div class="conn">
+        <span id="c-sistema" class="off">● Sistema</span>
+        <button onclick="connect('sistema')">Conectar</button>
+      </div>
+      <div class="conn">
+        <span id="c-usuarios" class="off">● Usuarios</span>
+        <button onclick="connect('usuarios')">Conectar</button>
+      </div>
+      <div class="conn">
+        <span id="c-config" class="off">● Config</span>
+        <button onclick="connect('config')">Conectar</button>
+      </div>
+
+      <div class="theme-toggle" onclick="toggleTheme()">🌙</div>
+    </div>
+  </div>
+
+  <iframe id="frame" src="login.html"></iframe>
+</main>
+
+<script>
+const sidebar = document.getElementById("sidebar");
+const overlay = document.getElementById("overlay");
+const frame   = document.getElementById("frame");
+const root    = document.documentElement;
+
+/* ===== MENU ===== */
+function toggleMenu(){
+ sidebar.classList.toggle("show");
+ overlay.classList.toggle("show");
+}
+function closeMenu(){
+ sidebar.classList.remove("show");
+ overlay.classList.remove("show");
+}
+
+/* ===== LOAD MODULE ===== */
+function loadModule(url, btn){
+ frame.src = url;
+ document.querySelectorAll(".menu button").forEach(b=>b.classList.remove("active"));
+ if(btn) btn.classList.add("active");
+
+ sidebar.style.display = url.includes("login") ? "none" : "block";
+ closeMenu();
+}
+
+/* ===== THEME ===== */
+function applyTheme(theme){
+ root.dataset.theme = theme;
+ localStorage.theme = theme;
+}
+function toggleTheme(){
+ applyTheme(root.dataset.theme==="dark"?"light":"dark");
+}
+applyTheme(localStorage.theme || "light");
+
+/* ===== CONEXIONES ===== */
+function connect(mod){
+ const el=document.getElementById("c-"+mod);
+ el.textContent="● Conectando...";
+ setTimeout(()=>{
+   el.textContent="● Conectado";
+   el.className="on";
+   localStorage.setItem("conn_"+mod,"1");
+ },800);
+}
+
+/* RESTAURAR ESTADO */
+["login","sistema","usuarios","config"].forEach(m=>{
+ if(localStorage.getItem("conn_"+m)){
+   const el=document.getElementById("c-"+m);
+   el.textContent="● Conectado";
+   el.className="on";
+ }
+});
+</script>
+
+</body>
+</html>

@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<title>Estado de Conexión · Soluciones Informática AS</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+
+<style>
+body{
+ margin:0;
+ padding:20px;
+ font-family:Arial, sans-serif;
+ background:#f8fafc;
+}
+
+.card{
+ background:#ffffff;
+ padding:18px;
+ border-radius:18px;
+ box-shadow:0 10px 25px rgba(0,0,0,.1);
+ max-width:1100px;
+ margin:auto;
+}
+
+h2{
+ margin-top:0;
+}
+
+.grid{
+ display:grid;
+ grid-template-columns:1fr 1fr;
+ gap:20px;
+}
+
+.info{
+ font-size:14px;
+ line-height:1.7;
+}
+
+.label{
+ color:#64748b;
+}
+
+.value{
+ font-weight:bold;
+}
+
+#map{
+ height:420px;
+ border-radius:14px;
+ margin-top:15px;
+ grid-column:1 / -1;
+}
+
+.badge{
+ display:inline-block;
+ padding:6px 14px;
+ background:#16a34a;
+ color:#fff;
+ border-radius:20px;
+ font-size:12px;
+ margin-top:10px;
+}
+
+.company{
+ font-size:15px;
+ font-weight:bold;
+ color:#2563eb;
+ margin-bottom:6px;
+}
+
+@media(max-width:900px){
+ .grid{grid-template-columns:1fr}
+}
+</style>
+</head>
+
+<body>
+
+<div class="card">
+
+  <div class="company">🏢 Soluciones Informática AS</div>
+  <h2>🖥️ Estado del Equipo Conectado</h2>
+
+  <div class="grid">
+
+    <!-- UBICACIÓN -->
+    <div class="info">
+      <div class="label">📍 Dirección</div>
+      <div class="value" id="address">Obteniendo...</div>
+
+      <div class="label">Latitud / Longitud</div>
+      <div class="value">
+        <span id="lat">—</span> ,
+        <span id="lon">—</span>
+      </div>
+
+      <div class="label">Precisión</div>
+      <div class="value"><span id="acc">—</span> metros</div>
+
+      <div class="label">🕒 Fecha y hora de conexión</div>
+      <div class="value" id="fecha"></div>
+    </div>
+
+    <!-- EQUIPO -->
+    <div class="info">
+      <div class="label">💻 Equipo</div>
+      <div class="value" id="device">—</div>
+
+      <div class="label">🌐 Navegador</div>
+      <div class="value" id="browser">—</div>
+
+      <div class="label">📶 Tipo de Internet</div>
+      <div class="value" id="net">—</div>
+
+      <span class="badge">CONEXIÓN ACTIVA</span>
+    </div>
+
+    <!-- MAPA -->
+    <div id="map"></div>
+
+  </div>
+</div>
+
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
+<script>
+/* ===== FECHA CONEXIÓN ===== */
+document.getElementById("fecha").textContent =
+ new Date().toLocaleString();
+
+/* ===== EQUIPO Y NAVEGADOR ===== */
+const ua = navigator.userAgent;
+
+document.getElementById("device").textContent =
+  /Android/i.test(ua) ? "Móvil Android" :
+  /iPhone|iPad/i.test(ua) ? "Dispositivo Apple" :
+  /Windows/i.test(ua) ? "PC Windows" :
+  /Mac/i.test(ua) ? "Mac" :
+  "Equipo desconocido";
+
+document.getElementById("browser").textContent =
+  ua.includes("Edg") ? "Microsoft Edge" :
+  ua.includes("Chrome") ? "Google Chrome" :
+  ua.includes("Firefox") ? "Mozilla Firefox" :
+  ua.includes("Safari") ? "Safari" :
+  "Navegador desconocido";
+
+/* ===== TIPO DE INTERNET ===== */
+if(navigator.connection){
+  const c = navigator.connection;
+  document.getElementById("net").textContent =
+    (c.type || "Red") + " · " + (c.effectiveType || "desconocido");
+}else{
+  document.getElementById("net").textContent = "No disponible";
+}
+
+/* ===== MAPA ===== */
+const map = L.map("map").setView([0,0],2);
+L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",{
+ attribution:"© OpenStreetMap"
+}).addTo(map);
+
+let marker, circle;
+let lastFetch = 0;
+
+/* ===== GEOLOCALIZACIÓN REAL ===== */
+navigator.geolocation.watchPosition(
+  pos => {
+    const lat = pos.coords.latitude;
+    const lon = pos.coords.longitude;
+    const acc = pos.coords.accuracy;
+
+    document.getElementById("lat").textContent = lat.toFixed(6);
+    document.getElementById("lon").textContent = lon.toFixed(6);
+    document.getElementById("acc").textContent = Math.round(acc);
+
+    map.setView([lat,lon],16);
+
+    if(marker){
+      marker.setLatLng([lat,lon]);
+      circle.setLatLng([lat,lon]).setRadius(acc);
+    }else{
+      marker = L.marker([lat,lon])
+        .addTo(map)
+        .bindPopup("📍 Ubicación del equipo")
+        .openPopup();
+
+      circle = L.circle([lat,lon],{
+        radius:acc,
+        color:"#2563eb",
+        fillColor:"#2563eb",
+        fillOpacity:0.2
+      }).addTo(map);
+    }
+
+    const now = Date.now();
+    if(now - lastFetch > 5000){
+      lastFetch = now;
+      reverseGeocode(lat, lon);
+    }
+  },
+  err => alert("Error de ubicación: " + err.message),
+  { enableHighAccuracy:true }
+);
+
+/* ===== LAT/LON → DIRECCIÓN ===== */
+function reverseGeocode(lat, lon){
+  fetch(`https://nominatim.openstreetmap.org/reverse?format=jsonv2&lat=${lat}&lon=${lon}`)
+    .then(r=>r.json())
+    .then(d=>{
+      document.getElementById("address").textContent =
+        d.display_name || "Dirección no disponible";
+    })
+    .catch(()=>{
+      document.getElementById("address").textContent =
+        "No se pudo obtener la dirección";
+    });
+}
+</script>
+
+</body>
+</html>
